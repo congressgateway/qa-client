@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'
 import { getSession, listLectures, setSession, type Lecture, type Role } from './api'
 import { Lectures } from './Lectures'
-import { Login } from './Login'
+import { hours } from './useQuestions'
+import { Brand, Login } from './Login'
 import { Moderator } from './Moderator'
 import { Speaker } from './Speaker'
 
@@ -21,50 +22,77 @@ export default function App() {
       .catch(console.error)
   }, [role, session, lectureId])
 
+  useEffect(() => {
+    document.title = lecture ? `${lecture.title} | Q&A` : 'Conference Q&A'
+  }, [lecture])
+
   if (!role) {
     return (
-      <main>
-        <h1>Conference Q&amp;A</h1>
-        <p>
-          <a href="/moderate">Moderator</a> · <a href="/speaker">Speaker</a>
-        </p>
+      <main className="home">
+        <Brand />
+        <h1>Questions from the hall, straight to the stage.</h1>
+        <div className="doors">
+          <a href="/moderate">
+            <b>I'm moderating</b>
+            <span>Review questions from the app and choose what the speaker sees.</span>
+          </a>
+          <a href="/speaker">
+            <b>I'm speaking</b>
+            <span>See the questions picked for your lecture, one at a time.</span>
+          </a>
+        </div>
       </main>
     )
   }
   if (!session) return <Login role={role} onLogin={() => setCurrent(getSession(role))} />
 
-  const base =role === 'admin' ? '/moderate' : '/speaker'
+  const base = role === 'admin' ? '/moderate' : '/speaker'
   const logout = () => {
     setSession(role, null)
     setCurrent(null)
   }
 
   return (
-    <main>
+    <main className={lectureId && role === 'speaker' ? 'stage' : undefined}>
       <header className="bar">
-        {lectureId ? <a href={base}>← All lectures</a> : <span />}
-        <span>
-          {session.name} · <button onClick={logout}>Log out</button>
+        <Brand />
+        <span className="who">
+          {session.name}
+          <button className="quiet small" onClick={logout}>
+            Sign out
+          </button>
         </span>
       </header>
-      <h1>
-        {role === 'admin' ? 'Moderator' : 'Questions'}
-        {lectureId ? '' : ' · Lectures'}
-      </h1>
-      {lecture && (
-        <p className="lecture-head">
-          <b>{lecture.title}</b>
-          <small>
-            {lecture.location} · {lecture.speakers.map((s) => s.name).join(', ')}
-          </small>
-        </p>
-      )}
-      {!lectureId ? (
-        <Lectures role={role} />
-      ) : role === 'admin' ? (
-        <Moderator lectureId={lectureId} />
+      {lectureId ? (
+        <>
+          <a className="back" href={base}>
+            All lectures
+          </a>
+          <div className="lecture-head">
+            <h1>{lecture?.title ?? 'Lecture'}</h1>
+            {lecture && (
+              <p className="lecture-meta">
+                <span>
+                  {hours(lecture.from)} to {hours(lecture.to)}
+                </span>
+                {lecture.location && <span>{lecture.location}</span>}
+                {lecture.speakers.length > 0 && (
+                  <span>{lecture.speakers.map((s) => s.name).join(', ')}</span>
+                )}
+              </p>
+            )}
+          </div>
+          {role === 'admin' ? (
+            <Moderator lectureId={lectureId} />
+          ) : (
+            <Speaker lectureId={lectureId} />
+          )}
+        </>
       ) : (
-        <Speaker lectureId={lectureId} />
+        <>
+          <h1>{role === 'admin' ? 'Pick a lecture to moderate' : 'Your lectures'}</h1>
+          <Lectures role={role} />
+        </>
       )}
     </main>
   )

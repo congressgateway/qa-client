@@ -1,5 +1,5 @@
-import { updateQuestion, type Question } from './api'
-import { useQuestions } from './useQuestions'
+import { updateQuestion, type Question, type Status } from './api'
+import { clock, useAction, useQuestions } from './useQuestions'
 
 /** Position halfway into the gap the question moves to (one row update per move). */
 function positionFor(list: Question[], i: number, dir: -1 | 1) {
@@ -9,63 +9,137 @@ function positionFor(list: Question[], i: number, dir: -1 | 1) {
 }
 
 export function Moderator({ lectureId }: { lectureId: number }) {
-  const { questions, error } = useQuestions(lectureId, 'admin')
+  const { questions, loaded, live, error } = useQuestions(lectureId, 'admin')
+  const { act, busy, failure } = useAction((id, patch: { status?: Status; position?: number }) =>
+    updateQuestion('admin', id, patch),
+  )
   const pending = questions.filter((q) => q.status === 'pending')
   const approved = questions.filter((q) => q.status === 'approved')
-  const set = (q: Question, patch: Parameters<typeof updateQuestion>[2]) =>
-    void updateQuestion('admin', q.id, patch).catch(console.error)
+  const done = questions
+    .filter((q) => q.status === 'answered' || q.status === 'rejected')
+    .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
 
   return (
     <>
-      {error && <p className="error">{error}</p>}
+      <LiveStatus live={live} error={error ?? failure} />
       <div className="columns">
-        <section>
-          <h2>Incoming ({pending.length})</h2>
-          {pending.length === 0 && <p className="empty">No new questions.</p>}
+        <section className="lane lane-incoming">
+          <h2>
+            Incoming <span className="count">{pending.length}</span>
+          </h2>
+          {loaded && pending.length === 0 && (
+            <p className="empty">New questions from the app appear here.</p>
+          )}
           {pending.map((q) => (
-            <article key={q.id}>
-              <p>{q.text}</p>
-              <small>{q.name}</small>
+            <article key={q.id} className="question">
+              <p className="q-text">{q.text}</p>
+              <p className="q-meta">
+                {q.name}, {clock(q.createdAt)}
+              </p>
               <div className="actions">
-                <button className="primary" onClick={() => set(q, { status: 'approved' })}>
-                  Approve
+                <button
+                  className="primary"
+                  disabled={busy.includes(q.id)}
+                  onClick={() => act(q.id, { status: 'approved' })}
+                >
+                  Send to speaker
                 </button>
-                <button onClick={() => set(q, { status: 'rejected' })}>Reject</button>
+                <button
+                  className="quiet"
+                  disabled={busy.includes(q.id)}
+                  onClick={() => act(q.id, { status: 'rejected' })}
+                >
+                  Reject
+                </button>
               </div>
             </article>
           ))}
         </section>
-        <section>
-          <h2>Queue for speaker ({approved.length})</h2>
-          {approved.length === 0 && <p className="empty">Approve a question to queue it.</p>}
-          {approved.map((q, i) => (
-            <article key={q.id}>
-              <p>
-                <b>{i + 1}.</b> {q.text}
-              </p>
-              <small>{q.name}</small>
-              <div className="actions">
-                <button
-                  disabled={i === 0}
-                  aria-label="Move up"
-                  onClick={() => set(q, { position: positionFor(approved, i, -1) })}
-                >
-                  ↑
-                </button>
-                <button
-                  disabled={i === approved.length - 1}
-                  aria-label="Move down"
-                  onClick={() => set(q, { position: positionFor(approved, i, 1) })}
-                >
-                  ↓
-                </button>
-                <button onClick={() => set(q, { status: 'pending' })}>Unqueue</button>
-              </div>
-            </article>
-          ))}
+
+        <section className="lane lane-queue">
+          <h2>
+            Speaker's queue <span className="count">{approved.length}</span>
+          </h2>
+          {loaded && approved.length === 0 && (
+            <p className="empty">Questions you send to the speaker line up here, in this order.</p>
+          )}
+          <ol className="queue">
+            {approved.map((q, i) => (
+              <li key={q.id} className="question">
+                <span className="rank">{i + 1}</span>
+                <div>
+                  <p className="q-text">{q.text}</p>
+                  <p className="q-meta">
+                    {q.name}, {clock(q.createdAt)}
+                  </p>
+                </div>
+                <div className="reorder">
+                  <button
+                    className="icon"
+                    title="Move up"
+                    aria-label="Move up"
+                    disabled={i === 0 || busy.includes(q.id)}
+                    onClick={() => act(q.id, { position: positionFor(approved, i, -1) })}
+                  >
+                    ▲
+                  </button>
+                  <button
+                    className="icon"
+                    title="Move down"
+                    aria-label="Move down"
+                    disabled={i === approved.length - 1 || busy.includes(q.id)}
+                    onClick={() => act(q.id, { position: positionFor(approved, i, 1) })}
+                  >
+                    ▼
+                  </button>
+                  <button
+                    className="icon"
+                    title="Take back to incoming"
+                    aria-label="Take back to incoming"
+                    disabled={busy.includes(q.id)}
+                    onClick={() => act(q.id, { status: 'pending' })}
+                  >
+                    ✕
+                  </button>
+                </div>
+              </li>
+            ))}
+          </ol>
         </section>
       </div>
+
+      {done.length > 0 && (
+        <details className="done">
+          <summary>
+            Answered and rejected <span className="count">{done.length}</span>
+          </summary>
+          <ul>
+            {done.map((q) => (
+              <li key={q.id} className={`done-row is-${q.status}`}>
+                <span className="tag">{q.status === 'answered' ? 'Answered' : 'Rejected'}</span>
+                <span className="done-text">{q.text}</span>
+                <button
+                  className="quiet"
+                  disabled={busy.includes(q.id)}
+                  onClick={() => act(q.id, { status: 'pending' })}
+                >
+                  Restore
+                </button>
+              </li>
+            ))}
+          </ul>
+        </details>
+      )}
     </>
   )
 }
 
+export function LiveStatus({ live, error }: { live: boolean; error?: string }) {
+  return (
+    <div className="status" role="status">
+      <span className={live ? 'dot live' : 'dot'} />
+      {live ? 'Live' : 'Reconnecting…'}
+      {error && <span className="error">{error}</span>}
+    </div>
+  )
+}

@@ -1,9 +1,22 @@
 import { useState, type FormEvent } from 'react'
 import { login, setSession, type Role } from './api'
 
-const FIELDS: Record<Role, { title: string; user: string; userType: string }> = {
-  admin: { title: 'Moderator login', user: 'Username', userType: 'text' },
-  speaker: { title: 'Speaker login', user: 'Speaker ID', userType: 'number' },
+const FIELDS: Record<
+  Role,
+  { title: string; hint: string; user: string; userType: string }
+> = {
+  admin: {
+    title: 'Sign in to moderate',
+    hint: 'Use the moderator account the organisers gave you.',
+    user: 'Username',
+    userType: 'text',
+  },
+  speaker: {
+    title: 'Sign in as a speaker',
+    hint: 'Your speaker ID is the number the organisers sent you with your password.',
+    user: 'Speaker ID',
+    userType: 'number',
+  },
 }
 
 export function Login({ role, onLogin }: { role: Role; onLogin: () => void }) {
@@ -33,7 +46,9 @@ export function Login({ role, onLogin }: { role: Role; onLogin: () => void }) {
   return (
     <main className="login">
       <form onSubmit={submit}>
+        <Brand />
         <h1>{f.title}</h1>
+        <p className="hint">{f.hint}</p>
         <label>
           {f.user}
           <input
@@ -56,11 +71,26 @@ export function Login({ role, onLogin }: { role: Role; onLogin: () => void }) {
             required
           />
         </label>
-        {error && <p className="error">{error}</p>}
+        {error && (
+          <p className="error" role="alert">
+            {error}
+          </p>
+        )}
         <button className="primary" disabled={busy}>
           {busy ? 'Signing in…' : 'Sign in'}
         </button>
       </form>
     </main>
+  )
+}
+
+export function Brand() {
+  return (
+    <a className="brand" href="/">
+      <span className="mark" aria-hidden>
+        Q
+      </span>
+      Conference Q&amp;A
+    </a>
   )
 }
