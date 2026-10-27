@@ -1,0 +1,238 @@
+:root {
+  --brand: #1c396c;
+  --text: #1a1d24;
+  --muted: #6b7280;
+  --bg: #f5f6f8;
+  --card: #fff;
+  --border: #e3e5ea;
+  --danger: #b42318;
+  font: 16px/1.45 system-ui, 'Segoe UI', Roboto, sans-serif;
+  color: var(--text);
+  background: var(--bg);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --brand: #7ea6e8;
+    --text: #e8eaee;
+    --muted: #9ca3af;
+    --bg: #14161b;
+    --card: #1e2128;
+    --border: #2e323b;
+    --danger: #f97066;
+  }
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+}
+
+main {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 16px;
+}
+
+h1 {
+  color: var(--brand);
+  font-size: 1.6rem;
+  margin: 8px 0 16px;
+}
+
+h2 {
+  font-size: 1rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.columns {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 24px;
+}
+
+article,
+li {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px 14px;
+  margin-bottom: 10px;
+}
+
+article p,
+li p {
+  margin: 0 0 4px;
+}
+
+small,
+.empty {
+  color: var(--muted);
+}
+
+.error {
+  color: var(--danger);
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+button {
+  font: inherit;
+  padding: 6px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--text);
+  cursor: pointer;
+}
+
+button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+button.primary {
+  background: var(--brand);
+  border-color: var(--brand);
+  color: #fff;
+}
+
+a {
+  color: var(--brand);
+}
+
+input {
+  font: inherit;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--card);
+  color: var(--text);
+}
+
+.bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.bar button {
+  padding: 2px 10px;
+  font-size: 0.85rem;
+}
+
+.lecture-head {
+  display: flex;
+  flex-direction: column;
+  margin: -8px 0 16px;
+}
+
+/* Login */
+.login form {
+  max-width: 340px;
+  margin: 12vh auto 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 24px;
+}
+
+.login label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
+/* Lecture list */
+.search {
+  width: 100%;
+  box-sizing: border-box;
+  margin-bottom: 12px;
+}
+
+.lectures {
+  list-style: none;
+  padding: 0;
+}
+
+.lectures li {
+  padding: 0;
+}
+
+.lectures a {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 12px 14px;
+  color: inherit;
+  text-decoration: none;
+}
+
+.lectures a:hover .lecture-title {
+  color: var(--brand);
+  text-decoration: underline;
+}
+
+.lecture-title {
+  font-weight: 600;
+}
+
+.badges {
+  display: flex;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.badge {
+  font-size: 0.8rem;
+  padding: 1px 8px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  color: var(--muted);
+}
+
+.badge.new {
+  background: var(--brand);
+  border-color: var(--brand);
+  color: #fff;
+}
+
+/* Speaker screen: readable from a lectern or projector. */
+.speaker {
+  font-size: 1.5rem;
+}
+
+.speaker ol {
+  list-style: none;
+  padding: 0;
+}
+
+.speaker li {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  column-gap: 16px;
+}
+
+.speaker li small {
+  grid-row: 2;
+}
+
+.speaker li button {
+  grid-row: 1 / span 2;
+  grid-column: 2;
+}
