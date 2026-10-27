@@ -55,6 +55,7 @@ function SpeakerPicker({ onPick }: { onPick: (s: Speaker) => void }) {
             {shown.map((s) => (
               <li key={s.id}>
                 <button type="button" onClick={() => onPick(s)}>
+                  <Avatar name={s.name} src={s.image} size={40} />
                   {s.name}
                 </button>
               </li>
@@ -105,8 +106,9 @@ function PasswordForm({
       <form className="card" onSubmit={submit}>
         {speaker ? (
           <>
-            <h1>{speaker.name}</h1>
-            <p className="hint">
+            <Avatar name={speaker.name} src={speaker.image} size={112} ring />
+            <h1 className="center">{speaker.name}</h1>
+            <p className="hint center">
               Not you?{' '}
               <button type="button" className="link" onClick={onBack}>
                 Choose another name
@@ -150,6 +152,40 @@ function PasswordForm({
         </button>
       </form>
     </main>
+  )
+}
+
+/** Round speaker photo; falls back to initials when there's no photo or it fails to load. */
+export function Avatar({
+  name,
+  src,
+  size,
+  ring,
+}: {
+  name: string
+  src?: string
+  size: number
+  ring?: boolean
+}) {
+  const [broken, setBroken] = useState(false)
+  const initials = name
+    .replace(/^((Prof|Dr|Assoc|Assist|Mr|Mrs|Ms)\.?\s+)+/i, '')
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((w) => w[0])
+    .join('')
+  return (
+    <span
+      className={ring ? 'avatar ring' : 'avatar'}
+      style={{ width: size, height: size, fontSize: size * 0.36 }}
+      aria-hidden
+    >
+      {src && !broken ? (
+        <img src={src} alt="" loading="lazy" onError={() => setBroken(true)} />
+      ) : (
+        initials
+      )}
+    </span>
   )
 }
 

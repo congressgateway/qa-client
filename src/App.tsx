@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { getSession, listLectures, setSession, type Lecture, type Role } from './api'
 import { Lectures } from './Lectures'
 import { hours } from './useQuestions'
-import { Login, TopBar } from './Login'
+import { Avatar, Login, TopBar } from './Login'
 import { Moderator } from './Moderator'
 import { Speaker } from './Speaker'
 
@@ -56,10 +56,13 @@ export default function App() {
     <main className={lectureId && role === 'speaker' ? 'stage' : undefined}>
       <TopBar>
         <span className="who">
-          {session.name}
-          <button className="quiet small" onClick={logout}>
-            Sign out
-          </button>
+          {role === 'speaker' && <Avatar name={session.name} src={session.image} size={40} />}
+          <span className="who-text">
+            <span>{session.name}</span>
+            <button className="quiet small" onClick={logout}>
+              Sign out
+            </button>
+          </span>
         </span>
       </TopBar>
       {lectureId ? (
@@ -75,10 +78,22 @@ export default function App() {
                   {hours(lecture.from)} to {hours(lecture.to)}
                 </span>
                 {lecture.location && <span>{lecture.location}</span>}
-                {lecture.speakers.length > 0 && (
-                  <span>{lecture.speakers.map((s) => s.name).join(', ')}</span>
-                )}
               </p>
+            )}
+            {lecture && lecture.speakers.length > 0 && (
+              <div className="lecture-speakers head-speakers">
+                {lecture.speakers.map((s) => (
+                  <span key={s.id}>
+                    <Avatar
+                      name={s.name}
+                      src={s.image}
+                      size={role === 'speaker' ? 64 : 36}
+                      ring={role === 'speaker'}
+                    />
+                    {s.name}
+                  </span>
+                ))}
+              </div>
             )}
           </div>
           {role === 'admin' ? (
@@ -89,7 +104,18 @@ export default function App() {
         </>
       ) : (
         <>
-          <h1>{role === 'admin' ? 'Pick a lecture to moderate' : 'Your lectures'}</h1>
+          {role === 'admin' ? (
+            <h1>Pick a lecture to moderate</h1>
+          ) : (
+            <div className="welcome">
+              <Avatar name={session.name} src={session.image} size={96} ring />
+              <div>
+                <p className="welcome-hello">Welcome,</p>
+                <h1>{session.name}</h1>
+                <p className="hint">Open your lecture to see the questions the moderator puts on screen.</p>
+              </div>
+            </div>
+          )}
           <Lectures role={role} />
         </>
       )}

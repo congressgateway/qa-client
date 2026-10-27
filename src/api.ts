@@ -24,12 +24,12 @@ export type Lecture = {
   to: string
   location: string
   session: string
-  speakers: { id: number; name: string }[]
+  speakers: Speaker[]
   pending: number
   approved: number
 }
 
-export type Session = { token: string; name: string }
+export type Session = { token: string; name: string; image?: string }
 
 // Admin and speaker logins are kept separately so one browser can test both.
 const storageKey = (role: Role) => `qa.${role}`
@@ -75,7 +75,7 @@ export const login = (role: Role, credentials: Record<string, unknown>) =>
     body: JSON.stringify(credentials),
   })
 
-export type Speaker = { id: number; name: string }
+export type Speaker = { id: number; name: string; image: string }
 
 export const listSpeakers = () => request<Speaker[]>(null, '/speakers')
 
