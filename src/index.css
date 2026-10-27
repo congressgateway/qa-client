@@ -1,40 +1,26 @@
-/* Navy is the app's brand colour. Amber = waiting on the moderator, green = live/answered. */
+/* The app's colours: navy main, yellow secondary (AppPallete.yellowColor).
+   Yellow = waiting on someone / next up, green = live/answered. Light theme only. */
 :root {
+  color-scheme: light;
   --navy: #1c396c;
   --ink: #13213a;
   --muted: #5d6b82;
-  --bg: #edf1f6;
+  --bg: #f4f6fa;
   --surface: #ffffff;
-  --line: #d6dde7;
-  --amber: #b86e0a;
-  --amber-soft: #fdf3e1;
+  --line: #dde3ec;
+  --yellow: #fdc448;
+  --yellow-soft: #fff5db;
+  --yellow-ink: #7a5200; /* readable text on yellow-soft */
   --green: #1e8e5a;
   --green-soft: #e3f4ec;
   --danger: #b42318;
-  --focus: #3b74d8;
+  --focus: #1c396c;
   --ui: 'Inter', system-ui, 'Segoe UI', sans-serif;
   --voice: 'Rosario', 'Inter', system-ui, sans-serif;
   font: 15px/1.5 var(--ui);
   color: var(--ink);
   background: var(--bg);
   -webkit-font-smoothing: antialiased;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --navy: #8db0ee;
-    --ink: #e6ecf5;
-    --muted: #93a1b8;
-    --bg: #0f1726;
-    --surface: #18233a;
-    --line: #26334d;
-    --amber: #f0ad4e;
-    --amber-soft: #2e2617;
-    --green: #4cc38a;
-    --green-soft: #15302a;
-    --danger: #f97066;
-    --focus: #8db0ee;
-  }
 }
 
 * {
@@ -154,36 +140,45 @@ input {
   color: var(--ink);
 }
 
-/* Header */
+/* Header: conference logo left, partner logo right, yellow rule underneath. */
 .bar {
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: 12px;
-  padding-bottom: 16px;
-  margin-bottom: 8px;
-  border-bottom: 1px solid var(--line);
+  padding-bottom: 12px;
+  margin-bottom: 12px;
+  border-bottom: 3px solid var(--yellow);
 }
 
-.brand {
-  display: inline-flex;
+.bar > a {
+  display: flex;
+}
+
+.bar-end {
+  display: flex;
   align-items: center;
-  gap: 10px;
-  font-weight: 600;
-  color: var(--ink);
-  text-decoration: none;
+  gap: 16px;
 }
 
-.mark {
-  display: grid;
-  place-items: center;
-  width: 30px;
-  height: 30px;
-  border-radius: 8px 8px 8px 2px; /* a speech bubble, the one shape this app is about */
-  background: var(--navy);
-  color: var(--surface);
-  font-family: var(--voice);
-  font-weight: 600;
+.logo-left {
+  height: 56px;
+  width: auto;
+}
+
+.logo-right {
+  height: 60px;
+  width: auto;
+}
+
+@media (max-width: 600px) {
+  .logo-left {
+    height: 42px;
+  }
+
+  .logo-right {
+    height: 44px;
+  }
 }
 
 .who {
@@ -240,7 +235,7 @@ input {
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: var(--amber);
+  background: var(--yellow);
 }
 
 .dot.live {
@@ -278,12 +273,12 @@ input {
 }
 
 .lane-incoming .question {
-  border-left: 4px solid var(--amber);
+  border-left: 4px solid var(--yellow);
 }
 
 .lane-incoming .count {
-  background: var(--amber-soft);
-  color: var(--amber);
+  background: var(--yellow);
+  color: var(--navy);
   font-weight: 600;
 }
 
@@ -320,17 +315,25 @@ input {
 }
 
 .rank {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--bg);
   font-family: var(--voice);
-  font-size: 1.4rem;
   font-weight: 600;
-  line-height: 1.1;
   color: var(--navy);
-  min-width: 1.2em;
 }
 
+/* The question the speaker is about to take. */
 .queue .question:first-child {
   border-color: var(--navy);
   box-shadow: inset 0 0 0 1px var(--navy);
+}
+
+.queue .question:first-child .rank {
+  background: var(--yellow);
 }
 
 .reorder {
@@ -474,8 +477,8 @@ input {
 }
 
 .badge.new {
-  background: var(--amber-soft);
-  color: var(--amber);
+  background: var(--yellow);
+  color: var(--navy);
 }
 
 .badge.live {
@@ -496,15 +499,15 @@ input {
 
 /* Home and login */
 .home {
-  max-width: 720px;
-  padding-top: 10vh;
+  max-width: 760px;
 }
 
 .home h1 {
   font-family: var(--voice);
   font-size: clamp(2rem, 6vw, 3rem);
   font-weight: 600;
-  margin: 32px 0;
+  color: var(--navy);
+  margin: 10vh 0 32px;
 }
 
 .doors {
@@ -527,6 +530,7 @@ input {
 
 .doors a:hover {
   border-color: var(--navy);
+  box-shadow: inset 0 -3px 0 var(--yellow);
 }
 
 .doors b {
@@ -534,9 +538,9 @@ input {
   font-size: 1.15rem;
 }
 
-.login form {
-  max-width: 380px;
-  margin: 10vh auto 0;
+.login .card {
+  max-width: 420px;
+  margin: 8vh auto 0;
   display: flex;
   flex-direction: column;
   gap: 16px;
@@ -547,8 +551,9 @@ input {
 }
 
 .login h1 {
-  margin: 12px 0 0;
+  margin: 0;
   font-size: 1.4rem;
+  color: var(--navy);
 }
 
 .hint {
@@ -565,27 +570,52 @@ input {
   font-weight: 500;
 }
 
-.login button {
+.login button.primary {
   padding: 11px;
 }
 
-/* Speaker stage: always dark, read from a lectern or a projector at a distance. */
-body:has(.stage) {
-  --navy: #8db0ee;
-  --ink: #f3f6fb;
-  --muted: #9aaac4;
-  --bg: #0e1b33;
-  --surface: #162645;
-  --line: #24365a;
-  --green: #4cc38a;
-  --green-soft: #173a33;
-  --amber: #f0ad4e;
-  --danger: #f97066;
-  --focus: #8db0ee;
-  background: var(--bg);
-  color: var(--ink);
+button.link {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--navy);
+  text-decoration: underline;
 }
 
+/* Speaker picker: a searchable list, since a <select> of every speaker is unusable. */
+.picker {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-height: 50vh;
+  overflow-y: auto;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+.picker li + li {
+  border-top: 1px solid var(--line);
+}
+
+.picker button {
+  width: 100%;
+  text-align: left;
+  border: 0;
+  border-radius: 0;
+  padding: 12px 14px;
+  background: var(--surface);
+}
+
+.picker button:hover {
+  background: var(--yellow-soft);
+}
+
+.picker .hint {
+  margin: 0;
+  padding: 12px 14px;
+}
+
+/* Speaker stage: read from a lectern or a projector at a distance. */
 .stage .lecture-head h1 {
   font-size: 1.25rem;
 }
@@ -598,6 +628,7 @@ body:has(.stage) {
 
 .now-text {
   font-family: var(--voice);
+  color: var(--navy);
   font-size: clamp(1.9rem, 4.6vw, 3.4rem);
   line-height: 1.25;
   font-weight: 500;
@@ -616,10 +647,14 @@ button.big {
   margin-top: 32px;
   padding: 16px 28px;
   font-size: 1.15rem;
-  background: var(--green);
-  border-color: var(--green);
-  color: #0e1b33;
+  background: var(--yellow);
+  border-color: var(--yellow);
+  color: var(--navy);
   font-weight: 600;
+}
+
+button.big:hover:not(:disabled) {
+  filter: brightness(0.96);
 }
 
 .next {

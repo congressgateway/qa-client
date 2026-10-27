@@ -1,40 +1,96 @@
-import { useState, type FormEvent } from 'react'
-import { login, setSession, type Role } from './api'
-
-const FIELDS: Record<
-  Role,
-  { title: string; hint: string; user: string; userType: string }
-> = {
-  admin: {
-    title: 'Sign in to moderate',
-    hint: 'Use the moderator account the organisers gave you.',
-    user: 'Username',
-    userType: 'text',
-  },
-  speaker: {
-    title: 'Sign in as a speaker',
-    hint: 'Your speaker ID is the number the organisers sent you with your password.',
-    user: 'Speaker ID',
-    userType: 'number',
-  },
-}
+import { useEffect, useState, type FormEvent, type ReactNode } from 'react'
+import { listSpeakers, login, setSession, type Role, type Speaker } from './api'
 
 export function Login({ role, onLogin }: { role: Role; onLogin: () => void }) {
+  const [speaker, setSpeaker] = useState<Speaker>()
+
+  if (role === 'speaker' && !speaker) return <SpeakerPicker onPick={setSpeaker} />
+  return (
+    <PasswordForm
+      role={role}
+      speaker={speaker}
+      onBack={() => setSpeaker(undefined)}
+      onLogin={onLogin}
+    />
+  )
+}
+
+/** Step 1 for speakers: find your name in the timetable. */
+function SpeakerPicker({ onPick }: { onPick: (s: Speaker) => void }) {
+  const [speakers, setSpeakers] = useState<Speaker[]>()
+  const [error, setError] = useState<string>()
+  const [filter, setFilter] = useState('')
+
+  useEffect(() => {
+    listSpeakers()
+      .then(setSpeakers)
+      .catch((e: Error) => setError(e.message))
+  }, [])
+
+  const q = filter.trim().toLowerCase()
+  const shown = speakers?.filter((s) => s.name.toLowerCase().includes(q))
+
+  return (
+    <main className="login">
+      <TopBar />
+      <div className="card">
+        <h1>Who's speaking?</h1>
+        <p className="hint">Choose your name from the conference timetable.</p>
+        <input
+          type="search"
+          placeholder="Search by name"
+          aria-label="Search by name"
+          value={filter}
+          onChange={(e) => setFilter(e.target.value)}
+          autoFocus
+        />
+        {error && (
+          <p className="error" role="alert">
+            Couldn't load the speaker list: {error}
+          </p>
+        )}
+        {!speakers && !error && <p className="hint">Loading speakers…</p>}
+        {shown && (
+          <ul className="picker">
+            {shown.map((s) => (
+              <li key={s.id}>
+                <button type="button" onClick={() => onPick(s)}>
+                  {s.name}
+                </button>
+              </li>
+            ))}
+            {shown.length === 0 && <li className="hint">No speaker matches “{filter}”.</li>}
+          </ul>
+        )}
+      </div>
+    </main>
+  )
+}
+
+function PasswordForm({
+  role,
+  speaker,
+  onBack,
+  onLogin,
+}: {
+  role: Role
+  speaker?: Speaker
+  onBack: () => void
+  onLogin: () => void
+}) {
   const [user, setUser] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string>()
   const [busy, setBusy] = useState(false)
-  const f = FIELDS[role]
 
   async function submit(e: FormEvent) {
     e.preventDefault()
     setBusy(true)
     setError(undefined)
     try {
-      const credentials =
-        role === 'admin'
-          ? { username: user.trim(), password }
-          : { speakerId: Number(user), password }
+      const credentials = speaker
+        ? { speakerId: speaker.id, password }
+        : { username: user.trim(), password }
       setSession(role, await login(role, credentials))
       onLogin()
     } catch (err) {
@@ -45,22 +101,34 @@ export function Login({ role, onLogin }: { role: Role; onLogin: () => void }) {
 
   return (
     <main className="login">
-      <form onSubmit={submit}>
-        <Brand />
-        <h1>{f.title}</h1>
-        <p className="hint">{f.hint}</p>
-        <label>
-          {f.user}
-          <input
-            type={f.userType}
-            inputMode={role === 'speaker' ? 'numeric' : undefined}
-            value={user}
-            onChange={(e) => setUser(e.target.value)}
-            autoComplete="username"
-            required
-            autoFocus
-          />
-        </label>
+      <TopBar />
+      <form className="card" onSubmit={submit}>
+        {speaker ? (
+          <>
+            <h1>{speaker.name}</h1>
+            <p className="hint">
+              Not you?{' '}
+              <button type="button" className="link" onClick={onBack}>
+                Choose another name
+              </button>
+            </p>
+          </>
+        ) : (
+          <>
+            <h1>Sign in to moderate</h1>
+            <p className="hint">Use the moderator account the organisers gave you.</p>
+            <label>
+              Username
+              <input
+                value={user}
+                onChange={(e) => setUser(e.target.value)}
+                autoComplete="username"
+                required
+                autoFocus
+              />
+            </label>
+          </>
+        )}
         <label>
           Password
           <input
@@ -69,6 +137,7 @@ export function Login({ role, onLogin }: { role: Role; onLogin: () => void }) {
             onChange={(e) => setPassword(e.target.value)}
             autoComplete="current-password"
             required
+            autoFocus={!!speaker}
           />
         </label>
         {error && (
@@ -84,13 +153,17 @@ export function Login({ role, onLogin }: { role: Role; onLogin: () => void }) {
   )
 }
 
-export function Brand() {
+/** Conference logo on the left, partner logo on the right, anything else in between. */
+export function TopBar({ children }: { children?: ReactNode }) {
   return (
-    <a className="brand" href="/">
-      <span className="mark" aria-hidden>
-        Q
+    <header className="bar">
+      <a href="/" aria-label="Conference Q&A home">
+        <img src="/Asset-1.svg" alt="Conference logo" className="logo-left" />
+      </a>
+      <span className="bar-end">
+        {children}
+        <img src="/Asset-2.svg" alt="Partner logo" className="logo-right" />
       </span>
-      Conference Q&amp;A
-    </a>
+    </header>
   )
 }

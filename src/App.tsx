@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { getSession, listLectures, setSession, type Lecture, type Role } from './api'
 import { Lectures } from './Lectures'
 import { hours } from './useQuestions'
-import { Brand, Login } from './Login'
+import { Login, TopBar } from './Login'
 import { Moderator } from './Moderator'
 import { Speaker } from './Speaker'
 
@@ -29,7 +29,7 @@ export default function App() {
   if (!role) {
     return (
       <main className="home">
-        <Brand />
+        <TopBar />
         <h1>Questions from the hall, straight to the stage.</h1>
         <div className="doors">
           <a href="/moderate">
@@ -54,15 +54,14 @@ export default function App() {
 
   return (
     <main className={lectureId && role === 'speaker' ? 'stage' : undefined}>
-      <header className="bar">
-        <Brand />
+      <TopBar>
         <span className="who">
           {session.name}
           <button className="quiet small" onClick={logout}>
             Sign out
           </button>
         </span>
-      </header>
+      </TopBar>
       {lectureId ? (
         <>
           <a className="back" href={base}>

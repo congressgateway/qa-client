@@ -73,6 +73,10 @@ export const login = (role: Role, credentials: Record<string, unknown>) =>
     body: JSON.stringify(credentials),
   })
 
+export type Speaker = { id: number; name: string }
+
+export const listSpeakers = () => request<Speaker[]>(null, '/speakers')
+
 export const listLectures = (role: Role) => request<Lecture[]>(role, '/lectures')
 
 export const listQuestions = (role: Role, lectureId: number) =>
