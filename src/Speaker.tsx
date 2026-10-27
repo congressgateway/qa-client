@@ -1,51 +1,25 @@
-import { updateQuestion } from './api'
 import { LiveStatus } from './Moderator'
-import { useAction, useQuestions } from './useQuestions'
+import { useQuestions } from './useQuestions'
 
-/** Stage view: the current question large enough to read from the lectern, the rest below. */
+/** Read-only stage view: shows whatever question the moderator has put on screen. */
 export function Speaker({ lectureId }: { lectureId: number }) {
   const { questions, loaded, live, error } = useQuestions(lectureId, 'speaker')
-  const { act, busy, failure } = useAction((id: number) =>
-    updateQuestion('speaker', id, { status: 'answered' }),
-  )
-  const [now, ...next] = questions.filter((q) => q.status === 'approved')
-  const answered = questions.filter((q) => q.status === 'answered').length
+  const now = questions.find((q) => q.onScreen && q.status === 'approved')
 
   return (
     <div className="speaker">
-      <LiveStatus live={live} error={error ?? failure} />
+      <LiveStatus live={live} error={error} />
       {loaded && !now && (
         <p className="stage-empty">
-          No questions yet. The moderator's picks appear here as they come in.
+          No question on screen. The moderator will display the next one here.
         </p>
       )}
       {now && (
         <section className="now" key={now.id} aria-live="polite">
           <p className="now-text">{now.text}</p>
           <p className="now-name">{now.name}</p>
-          <button
-            className="primary big"
-            disabled={busy.includes(now.id)}
-            onClick={() => act(now.id, undefined)}
-          >
-            {busy.includes(now.id) ? 'Moving on…' : 'Answered, next question'}
-          </button>
         </section>
       )}
-      {next.length > 0 && (
-        <section className="next">
-          <h2>Up next</h2>
-          <ol>
-            {next.map((q) => (
-              <li key={q.id}>
-                <p>{q.text}</p>
-                <small>{q.name}</small>
-              </li>
-            ))}
-          </ol>
-        </section>
-      )}
-      {answered > 0 && <p className="answered-count">{answered} answered so far</p>}
     </div>
   )
 }

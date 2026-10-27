@@ -1,4 +1,4 @@
-import { updateQuestion, type Question, type Status } from './api'
+import { displayQuestion, updateQuestion, type Question, type Status } from './api'
 import { clock, useAction, useQuestions } from './useQuestions'
 
 /** Position halfway into the gap the question moves to (one row update per move). */
@@ -10,8 +10,9 @@ function positionFor(list: Question[], i: number, dir: -1 | 1) {
 
 export function Moderator({ lectureId }: { lectureId: number }) {
   const { questions, loaded, live, error } = useQuestions(lectureId, 'admin')
-  const { act, busy, failure } = useAction((id, patch: { status?: Status; position?: number }) =>
-    updateQuestion('admin', id, patch),
+  const { act, busy, failure } = useAction(
+    (id, patch: { status?: Status; position?: number } | 'display') =>
+      patch === 'display' ? displayQuestion(id) : updateQuestion('admin', id, patch),
   )
   const pending = questions.filter((q) => q.status === 'pending')
   const approved = questions.filter((q) => q.status === 'approved')
@@ -61,17 +62,44 @@ export function Moderator({ lectureId }: { lectureId: number }) {
             Speaker's queue <span className="count">{approved.length}</span>
           </h2>
           {loaded && approved.length === 0 && (
-            <p className="empty">Questions you send to the speaker line up here, in this order.</p>
+            <p className="empty">
+              Questions you send to the speaker line up here. Display one to put it on the
+              speaker's screen.
+            </p>
           )}
           <ol className="queue">
             {approved.map((q, i) => (
-              <li key={q.id} className="question">
+              <li
+                key={q.id}
+                className={`question${q.onScreen ? ' is-on-screen' : q.displayedAt ? ' is-shown' : ''}`}
+              >
                 <span className="rank">{i + 1}</span>
                 <div>
+                  {q.onScreen && <span className="tag on-screen">On the speaker's screen</span>}
+                  {!q.onScreen && q.displayedAt && <span className="tag shown">Shown</span>}
                   <p className="q-text">{q.text}</p>
                   <p className="q-meta">
                     {q.name}, {clock(q.createdAt)}
                   </p>
+                  <div className="actions">
+                    {q.onScreen ? (
+                      <button
+                        className="primary"
+                        disabled={busy.includes(q.id)}
+                        onClick={() => act(q.id, { status: 'answered' })}
+                      >
+                        Answered, show next
+                      </button>
+                    ) : (
+                      <button
+                        className={q.displayedAt ? undefined : 'display'}
+                        disabled={busy.includes(q.id)}
+                        onClick={() => act(q.id, 'display')}
+                      >
+                        {q.displayedAt ? 'Display again' : 'Display'}
+                      </button>
+                    )}
+                  </div>
                 </div>
                 <div className="reorder">
                   <button

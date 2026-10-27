@@ -13,6 +13,8 @@ export type Question = {
   status: Status
   position: number
   createdAt: string
+  onScreen: boolean
+  displayedAt: string | null
 }
 
 export type Lecture = {
@@ -91,6 +93,9 @@ export const updateQuestion = (
     method: 'PATCH',
     body: JSON.stringify(patch),
   })
+
+export const displayQuestion = (id: number) =>
+  request<Question>('admin', `/questions/${id}/display`, { method: 'POST' })
 
 export const connect = (role: Role) =>
   io(API, { auth: { token: getSession(role)?.token } })

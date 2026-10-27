@@ -161,23 +161,25 @@ input {
   gap: 16px;
 }
 
+/* Asset-1 is wide (≈1.5:1), Asset-2 tall (≈0.7:1): the right one gets more height
+   so both read at a similar visual weight. */
 .logo-left {
-  height: 56px;
+  height: 88px;
   width: auto;
 }
 
 .logo-right {
-  height: 60px;
+  height: 100px;
   width: auto;
 }
 
 @media (max-width: 600px) {
   .logo-left {
-    height: 42px;
+    height: 60px;
   }
 
   .logo-right {
-    height: 44px;
+    height: 68px;
   }
 }
 
@@ -326,14 +328,45 @@ input {
   color: var(--navy);
 }
 
-/* The question the speaker is about to take. */
-.queue .question:first-child {
+/* On the speaker's screen right now. */
+.queue .is-on-screen {
   border-color: var(--navy);
   box-shadow: inset 0 0 0 1px var(--navy);
 }
 
-.queue .question:first-child .rank {
+.queue .is-on-screen .rank {
   background: var(--yellow);
+}
+
+/* Already shown to the speaker: greyed so unseen questions stand out. */
+.queue .is-shown {
+  background: var(--bg);
+}
+
+.queue .is-shown .q-text {
+  color: var(--muted);
+}
+
+.tag.on-screen {
+  display: inline-block;
+  margin-bottom: 6px;
+  padding: 2px 9px;
+  border-radius: 999px;
+  background: var(--yellow);
+  color: var(--navy);
+}
+
+.tag.shown {
+  display: inline-block;
+  margin-bottom: 6px;
+  color: var(--muted);
+}
+
+button.display {
+  background: var(--yellow);
+  border-color: var(--yellow);
+  color: var(--navy);
+  font-weight: 600;
 }
 
 .reorder {
@@ -615,7 +648,30 @@ button.link {
   padding: 12px 14px;
 }
 
-/* Speaker stage: read from a lectern or a projector at a distance. */
+/* Speaker stage: read from a lectern or a projector at a distance.
+   The Alexandria photo sits behind, blurred and washed with white so it tints without competing. */
+body:has(.stage)::before,
+body:has(.stage)::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+}
+
+body:has(.stage)::before {
+  inset: -24px; /* hide the soft edge the blur leaves */
+  background: url('/background.png') center / cover no-repeat;
+  filter: blur(6px) saturate(1.1);
+}
+
+body:has(.stage)::after {
+  background: linear-gradient(rgb(255 255 255 / 0.84), rgb(255 255 255 / 0.74));
+}
+
+.stage .bar {
+  border-bottom-color: rgb(253 196 72 / 0.8);
+}
 .stage .lecture-head h1 {
   font-size: 1.25rem;
 }
@@ -643,56 +699,12 @@ button.link {
   font-size: 1.15rem;
 }
 
-button.big {
-  margin-top: 32px;
-  padding: 16px 28px;
-  font-size: 1.15rem;
-  background: var(--yellow);
-  border-color: var(--yellow);
-  color: var(--navy);
-  font-weight: 600;
-}
-
-button.big:hover:not(:disabled) {
-  filter: brightness(0.96);
-}
-
-.next {
-  padding-top: 28px;
-}
-
-.next ol {
-  margin: 0;
-  padding-left: 1.4em;
-  color: var(--muted);
-}
-
-.next li {
-  padding: 10px 0;
-  font-size: 1.2rem;
-}
-
-.next li p {
-  font-family: var(--voice);
-  color: var(--ink);
-}
-
-.next li small {
-  font-size: 0.9rem;
-}
-
 .stage-empty {
   font-family: var(--voice);
   font-size: clamp(1.4rem, 3vw, 2rem);
   color: var(--muted);
   max-width: 30ch;
   padding: 48px 0;
-}
-
-.answered-count {
-  margin-top: 32px;
-  color: var(--muted);
-  font-size: 0.9rem;
 }
 
 @keyframes arrive {
