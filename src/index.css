@@ -181,6 +181,21 @@ input {
   .logo-right {
     height: 68px;
   }
+
+  /* Stack name over "Sign out" so both logos still fit a phone's width. */
+  .bar-end {
+    gap: 10px;
+    min-width: 0;
+  }
+
+  .who {
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0;
+    font-size: 0.8rem;
+    text-align: right;
+    min-width: 0;
+  }
 }
 
 .who {
@@ -650,6 +665,12 @@ button.link {
 
 /* Speaker stage: read from a lectern or a projector at a distance.
    The Alexandria photo sits behind, blurred and washed with white so it tints without competing. */
+/* The page's own solid background would paint over the photo layers. */
+:root:has(.stage),
+body:has(.stage) {
+  background: transparent;
+}
+
 body:has(.stage)::before,
 body:has(.stage)::after {
   content: '';
@@ -678,7 +699,6 @@ body:has(.stage)::after {
 
 .now {
   padding: 8px 0 40px;
-  border-bottom: 1px solid var(--line);
   animation: arrive 360ms ease-out;
 }
 
