@@ -805,11 +805,22 @@ button.link {
 }
 
 .stage .head-speakers > span {
-  gap: 14px;
+  gap: 20px;
+}
+
+.stage .head-speakers .avatar {
+  font-size: 2.4rem !important; /* initials fallback at this size */
+}
+
+@media (max-width: 600px) {
+  .stage .head-speakers .avatar {
+    width: 88px !important;
+    height: 88px !important;
+  }
 }
 
 .stage .head-speakers {
-  font-size: 1.1rem;
+  font-size: 1.35rem;
   font-weight: 600;
   color: var(--navy);
 }

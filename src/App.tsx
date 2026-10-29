@@ -87,7 +87,7 @@ export default function App() {
                     <Avatar
                       name={s.name}
                       src={s.image}
-                      size={role === 'speaker' ? 64 : 36}
+                      size={role === 'speaker' ? 128 : 36}
                       ring={role === 'speaker'}
                     />
                     {s.name}
