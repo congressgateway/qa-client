@@ -47,9 +47,10 @@ export default function App() {
   if (!session) return <Login role={role} onLogin={() => setCurrent(getSession(role))} />
 
   const base = role === 'admin' ? '/moderate' : '/speaker'
+  // Leave the lecture page too, so the next person's login doesn't land on someone else's lecture.
   const logout = () => {
     setSession(role, null)
-    setCurrent(null)
+    location.assign(base)
   }
 
   return (
